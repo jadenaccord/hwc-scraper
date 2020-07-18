@@ -93,7 +93,7 @@ for article in articles:
 
 if new_article_found == True:
     print('A new article was found, rewriting cache...')
-    #rewrite_cache()
+    rewrite_cache()
     send_email()
 
 else:
