@@ -46,7 +46,7 @@ def rewrite_cache():
 def send_email():
     body = ''
     for article in new_articles_data:
-        body += 'Title: {}\nAuthor: {}\nDate: {}\nPreview: {}\nLink to full article: {}\n\n'.format(article[1], article[2], article[0], article[3], 'https://www.hethwc.nl' + article[4])
+        body += 'Titel: {}\nAuteur: {}\nDatum: {}\nPreview: {}\nLees het hele artikel: {}\n\n'.format(article[1], article[2], article[0], article[3], 'https://www.hethwc.nl' + article[4])
 
     message = 'Subject: {}\nFrom: {}\nTo: {}\n\n{}'.format('Nieuw bericht op HWC website', 'HWC Actueel <jadenbr.dev@gmail.com>', 'Jaden Accord <34092@lln.hethwc.nl>', body)
 
