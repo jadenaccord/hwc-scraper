@@ -1,15 +1,31 @@
 import requests
 from bs4 import BeautifulSoup
 import os
+import smtplib, ssl
+from email.header import Header
+from dotenv import load_dotenv
+load_dotenv()
 
+# Web variables
 URL = 'https://www.hethwc.nl/actueel'
 page = requests.get(URL)
 soup = BeautifulSoup(page.content, 'html.parser')
 
+# Article variables
 new_article_found = False
+new_articles = []
+new_articles_data = []
 
+# E-mail variables
+port = 465
+password = os.environ.get('GMAIL_PASS')
+sender = 'jadenbrdev@gmail.com'
+recipient = 'jbr.accord@gmail.com' # TODO: Change this to 34092@lln.hethwc.nl
+
+# Scrape all articles into array
 articles = soup.findAll('div', class_='views-row')
 
+# Rewrite cache file
 def rewrite_cache():
     if os.path.exists('article_cache.txt'):
         os.remove('article_cache.txt')
@@ -25,6 +41,22 @@ def rewrite_cache():
         cache.write(article_id + '\n')
         cache.close()
         print('Wrote article to cache with id: ' + article_id)
+
+# Send email with new article(s)
+def send_email():
+    body = ''
+    for article in new_articles_data:
+        body += 'Title: {}\nAuthor: {}\nDate: {}\nPreview: {}\nLink to full article: {}\n\n'.format(article[1], article[2], article[0], article[3], 'https://www.hethwc.nl' + article[4])
+
+    message = 'Subject: {}\nFrom: {}\nTo: {}\n\n{}'.format('Nieuw bericht op HWC website', 'HWC Actueel <jadenbr.dev@gmail.com>', 'Jaden Accord <34092@lln.hethwc.nl>', body)
+
+    print('Sending email with message:\n' + message)
+
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
+        server.login(sender, password)
+        server.sendmail(sender, recipient, message)
+        server.quit()  
 
 for article in articles:
     date_div = article.find('div', class_='views-field-created-1')
@@ -46,18 +78,24 @@ for article in articles:
     article_id = date_txt + ': ' + title_txt
     print('Article id: ' + article_id)
 
+    article_data = [date_txt, title_txt, author_txt, body_txt, link_href]
+
     with open('article_cache.txt') as f:
         if article_id in f.read():
             print('Is in cache')
         else:
             print('Is not in cache.')
             new_article_found = True
+            new_articles.append(article)
+            new_articles_data.append(article_data)
 
     print('\n')
 
 if new_article_found == True:
     print('A new article was found, rewriting cache...')
-    rewrite_cache()
+    #rewrite_cache()
+    send_email()
+
 else:
     print('No new article was found.')
     
