@@ -1,8 +1,10 @@
 import requests
 from bs4 import BeautifulSoup
 import os
-import smtplib, ssl
+import email, smtplib, ssl
 from email.header import Header
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -44,19 +46,40 @@ def rewrite_cache():
 
 # Send email with new article(s)
 def send_email():
+    # Plain text body
     body = ''
     for article in new_articles_data:
         body += 'Titel: {}\nAuteur: {}\nDatum: {}\nPreview: {}\nLees het hele artikel: {}\n\n'.format(article[1], article[2], article[0], article[3], 'https://www.hethwc.nl' + article[4])
 
+    # Plain text message
     message = 'Subject: {}\nFrom: {}\nTo: {}\n\n{}'.format('Nieuw bericht op HWC website', 'HWC Actueel <jadenbr.dev@gmail.com>', 'Jaden Accord <34092@lln.hethwc.nl>', body)
 
-    print('Sending email with message:\n' + message)
+    # HTML body
+    html = '<html><body>'
+    for article in new_articles_data:
+        html += '<h2>{}</h2><i>{} ({})</i><br><p>{}</p><br><a href="{}">Lees het hele artikel</a><br><hr>'.format(article[1], article[2], article[0], article[3], 'https://www.hethwc.nl' + article[4])
+    html += '</body></html>'
+
+    # HTML message
+    htmlMessage = MIMEMultipart()
+    htmlMessage['From'] = 'HWC Actueel <{}>'.format(sender)
+    htmlMessage['To'] = recipient
+    if len(new_articles) > 1:
+        htmlMessage['Subject'] = 'Nieuwe berichten op HWC website'
+    else:
+        htmlMessage['Subject'] = 'Nieuw bericht op HWC website'
+
+    # Attach both plain text body and html body to html message
+    # htmlMessage.attach(MIMEText(body, 'plain'))
+    htmlMessage.attach(MIMEText(html, 'html'))
+
+    #print('Sending email with message:\n' + htmlMessage)
 
     context = ssl.create_default_context()
     with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
         server.login(sender, password)
-        server.sendmail(sender, recipient, message)
-        server.quit()  
+        server.sendmail(sender, recipient, htmlMessage.as_string())
+        server.quit()
 
 for article in articles:
     date_div = article.find('div', class_='views-field-created-1')
