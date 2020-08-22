@@ -1,1 +1,1 @@
-sudo python3 hwc_scraper.py
+sudo python3 __main__.py

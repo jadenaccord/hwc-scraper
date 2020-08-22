@@ -22,7 +22,7 @@ new_articles_data = []
 port = 465
 password = os.environ.get('GMAIL_PASS')
 sender = 'jadenbrdev@gmail.com'
-recipient = 'jbr.accord@gmail.com' # TODO: Change this to 34092@lln.hethwc.nl
+recipient = '34092@lln.hethwc.nl'
 
 # Scrape all articles into array
 articles = soup.findAll('div', class_='views-row')
