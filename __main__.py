@@ -16,10 +16,15 @@ password = os.environ.get('GMAIL_PASS')
 sender = 'jadenbrdev@gmail.com'
 recipient = '34092@lln.hethwc.nl'
 
-# Scrape website contents
-def scrape_site(URL):
-    URL = 'https://www.hermannwesselinkcollege.nl/actueel'
-    page = requests.get(URL)
+# Scrape home page contents
+def scrape_home():
+    page = requests.get('https://hermannwesselinkcollege.nl')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    return soup.findAll('div', class_="field-item") # Return field-item as raw html
+
+# Scrape actueel page contents
+def scrape_actueel():
+    page = requests.get('https://hermannwesselinkcollege.nl/actueel')
     soup = BeautifulSoup(page.content, 'html.parser')
     return soup.findAll('div', class_='views-row') # Return articles as raw html
 
@@ -102,7 +107,7 @@ def send_email(articles):
 # Main function
 def main():
     new_articles = []
-    raw_articles = scrape_site('https://hermannwesselinkcollege.nl')
+    raw_articles = scrape_site('https://hermannwesselinkcollege.nl/actueel')
     for article in raw_articles:
         article_obj = parse_article(article)
         if check_article_cache(article_obj) == False:
