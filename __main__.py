@@ -16,12 +16,6 @@ password = os.environ.get('GMAIL_PASS')
 sender = 'jadenbrdev@gmail.com'
 recipient = '34092@lln.hethwc.nl'
 
-# Scrape home page contents
-def scrape_home():
-    page = requests.get('https://hermannwesselinkcollege.nl')
-    soup = BeautifulSoup(page.content, 'html.parser')
-    return soup.findAll('div', class_="field-item") # Return field-item as raw html
-
 # Scrape actueel page contents
 def scrape_actueel():
     page = requests.get('https://hermannwesselinkcollege.nl/actueel')
