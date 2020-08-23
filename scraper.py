@@ -7,6 +7,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from dotenv import load_dotenv
 load_dotenv()
+import schedule
+import time
 
 from Article import Article
 
@@ -119,4 +121,8 @@ def main():
         print('No new article was found.')
 
 if __name__ == "__main__":
-    main()
+    print("Starting scheduled HWC scraper...")
+    schedule.every().day.at("08:00").do(main)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
