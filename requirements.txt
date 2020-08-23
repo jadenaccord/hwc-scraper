@@ -1,6 +1,0 @@
-requests
-bs4
-email
-smtplib
-ssl
-dotenv
