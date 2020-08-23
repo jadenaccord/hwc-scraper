@@ -107,7 +107,7 @@ def send_email(articles):
 # Main function
 def main():
     new_articles = []
-    raw_articles = scrape_site('https://hermannwesselinkcollege.nl/actueel')
+    raw_articles = scrape_actueel()
     for article in raw_articles:
         article_obj = parse_article(article)
         if check_article_cache(article_obj) == False:
