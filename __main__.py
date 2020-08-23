@@ -5,6 +5,8 @@ import email, smtplib, ssl
 from email.header import Header
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from apscheduler.schedulers.blocking import BlockingScheduler
+sched = BlockingScheduler()
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -105,6 +107,7 @@ def send_email(articles):
         server.quit()
 
 # Main function
+@sched.scheduled_job('cron', day_of_week='mon-sun', hour=8)
 def main():
     new_articles = []
     raw_articles = scrape_actueel()
@@ -121,4 +124,4 @@ def main():
         print('No new article was found.')
 
 if __name__ == "__main__":
-    main()
+    sched.start()
