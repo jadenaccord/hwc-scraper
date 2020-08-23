@@ -20,7 +20,7 @@ recipient = '34092@lln.hethwc.nl'
 def scrape_home():
     page = requests.get('https://www.hermannwesselinkcollege.nl/')
     soup = BeautifulSoup(page.content, 'html.parser')
-    return soup.findAll('div', class_='fields-item)
+    return soup.findAll('div', class_='fields-item')
 
 # Scrape actueel page contents
 def scrape_actueel():
