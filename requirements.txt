@@ -23,7 +23,7 @@ docutils==0.16
 entrypoints==0.3
 feedparser==5.2.1
 gitsome==0.8.4
-httplib2==0.14.0
+httplib2==0.18.0
 idna==2.8
 imagesize==1.2.0
 isort==5.4.2
