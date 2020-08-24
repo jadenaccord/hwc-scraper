@@ -15,8 +15,8 @@ from Article import Article
 # E-mail variables
 port = 465
 password = os.environ.get('GMAIL_PASS')
-sender = 'jadenbrdev@gmail.com'
-recipient = '34092@lln.hethwc.nl'
+sender = os.environ.get('GMAIL_USER')
+recipient = os.environ.get('GMAIL_DEST')
 
 # Scrape home page contents
 def scrape_home():
