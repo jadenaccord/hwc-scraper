@@ -1,2 +1,5 @@
 .env
 article_cache.txt
+__pycache__
+*.sh
+*.bat
