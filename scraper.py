@@ -157,6 +157,7 @@ def send_email(articles):
 
 # Main function
 def main():
+    # Scrape actueel
     new_articles = []
     raw_articles = scrape_actueel()
     for article in raw_articles:
@@ -171,6 +172,7 @@ def main():
     else:
         print('No new article was found.')
 
+    # Scrape home
     home_title, home_content = scrape_home()
     home_body = parse_home(home_title, home_content)
     if check_home_cache(home_body):
