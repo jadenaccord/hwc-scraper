@@ -35,14 +35,14 @@ def parse_home(_title, _paragraphs):
     return body
 
 # Email home page contents
-def email_home(htmlBody):
+def email_home(html):
     htmlMessage = MIMEMultipart()
     htmlMessage['From'] = 'HWC Actueel <{}>'.format(sender)
     htmlMessage['To'] = recipient
     htmlMessage['Subject'] = 'Nieuw bericht op de HWC voorpagina'
     htmlMessage.attach(MIMEText(html, 'html'))
 
-    print('Sending email with message:\n' + htmlMessage)
+    print('Sending email with message:\n' + str(htmlMessage))
 
     context = ssl.create_default_context()
     with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
@@ -52,13 +52,16 @@ def email_home(htmlBody):
 
 # Check home page cache
 def check_home_cache(body):
-    with open('home_cache.txt') as f:
-        if body in f.read():
-            print('Home is in cache')
-            return True
-        else:
-            print('Home is not in cache')
-            return False
+    if os.path.exists('home_cache.txt'):
+        with open('home_cache.txt') as f:
+            if body in f.read():
+                print('Home is in cache.')
+                return True
+            else:
+                print('Home is not in cache.')
+                return False
+    else:
+        print("Could not check home cache: file does not exist.")
 
 # Rewrite home cache file
 def rewrite_home_cache(body):
@@ -71,7 +74,7 @@ def rewrite_home_cache(body):
         f.write(body)
         f.close()
     
-    print('Wrote home page to cache')
+    print('Wrote home page to cache.')
 
 # Scrape actueel page contents
 def scrape_actueel():
@@ -107,20 +110,22 @@ def parse_article(article):
 
 # Check if article exists in cache
 def check_article_cache(article):
-    with open('article_cache.txt') as f:
-        if article.id in f.read():
-            print('Is in cache')
-            return True
-        else:
-            print('Is not in cache.')
-            return False
+    if(os.path.exists('article_cache.txt')):
+        with open('article_cache.txt') as f:
+            if article.id in f.read():
+                print('Is in cache.')
+                return True
+            else:
+                print('Is not in cache.')
+                return False
+    else:
+        print('Could not check article cache: file does not exist.')
+        return False
 
 # Rewrite cache file
 def rewrite_cache(new_articles):
     if os.path.exists('article_cache.txt'):
         os.remove('article_cache.txt')
-    else:
-        print('Cache not found, creating new.')
 
     for article in new_articles:
         cache = open('article_cache.txt', 'a')
@@ -147,7 +152,7 @@ def send_email(articles):
 
     htmlMessage.attach(MIMEText(html, 'html'))
 
-    print('Sending email with message:\n' + htmlMessage)
+    print('Sending email with message:\n' + str(htmlMessage))
 
     context = ssl.create_default_context()
     with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
@@ -167,7 +172,10 @@ def main():
     if len(new_articles) > 0:
         print('New articles were found, rewriting cache...')
         rewrite_cache(new_articles)
-        send_email(new_articles)
+        try:
+            send_email(new_articles)
+        except smtplib.SMTPResponseException:
+            print("Failed to send actueel email!")
     else:
         print('No new article was found.')
 
@@ -178,7 +186,10 @@ def main():
     else:
         print('New home page content was found, rewriting cache...')
         rewrite_home_cache(home_body)
-        email_home(home_body)
+        try:
+            email_home(home_body)
+        except smtplib.SMTPResponseException:
+            print("Failed to send home email!")
 
 if __name__ == "__main__":
     main()
