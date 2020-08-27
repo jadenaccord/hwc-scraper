@@ -172,10 +172,9 @@ def main():
     if len(new_articles) > 0:
         print('New articles were found, rewriting cache...')
         rewrite_cache(new_articles)
-        try:
-            send_email(new_articles)
-        except smtplib.SMTPResponseException:
-            print("Failed to send actueel email!")
+        try: send_email(new_articles)
+        except smtplib.SMTPResponseException: print("Failed to send actueel email!")
+        else: print("Succesfully sent actueel email.")
     else:
         print('No new article was found.')
 
@@ -186,10 +185,9 @@ def main():
     else:
         print('New home page content was found, rewriting cache...')
         rewrite_home_cache(home_body)
-        try:
-            email_home(home_body)
-        except smtplib.SMTPResponseException:
-            print("Failed to send home email!")
+        try: email_home(home_body)
+        except smtplib.SMTPResponseException: print("Failed to send home email!")
+        else: print("Succesfully sent home email.")
 
 if __name__ == "__main__":
     main()
