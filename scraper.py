@@ -22,7 +22,58 @@ recipient = os.environ.get('GMAIL_DEST')
 def scrape_home():
     page = requests.get('https://www.hermannwesselinkcollege.nl/')
     soup = BeautifulSoup(page.content, 'html.parser')
-    return soup.findAll('div', class_='fields-item')
+    title = soup.find('h1', class_='title')
+    children = soup.find('div', class_='field-item even').findChildren(recursive=False)
+    return title, children
+
+# Parse home page contents
+def parse_home(_title, _paragraphs):
+    body = '<html><body>'
+    body += str(_title)
+    for paragraph in _paragraphs:
+        if paragraph.text != "" and paragraph.text != " ":
+            body += '<p>{}<p>'.format(paragraph)
+    body += '</body></html>'
+    return body
+
+# Email home page contents
+def email_home(htmlBody):
+    htmlMessage = MIMEMultipart()
+    htmlMessage['From'] = 'HWC Actueel <{}>'.format(sender)
+    htmlMessage['To'] = recipient
+    htmlMessage['Subject'] = 'Nieuw bericht op de HWC voorpagina'
+    htmlMessage.attach(MIMEText(html, 'html'))
+
+    print('Sending email with message:\n' + htmlMessage)
+
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
+        server.login(sender, password)
+        server.sendmail(sender, recipient, htmlMessage.as_string())
+        server.quit()
+
+# Check home page cache
+def check_home_cache(body):
+    with open('home_cache.txt') as f:
+        if body in f.read():
+            print('Home is in cache')
+            return True
+        else:
+            print('Home is not in cache')
+            return False
+
+# Rewrite home cache file
+def rewrite_home_cache(body):
+    if os.path.exists('home_cache.txt'):
+        os.remove('home_cache.txt')
+    else:
+        print('Home cache not found, creating new.')
+
+    with open('home_cache.txt', 'a') as f:
+        f.write(body)
+        f.close()
+    
+    print('Wrote home page to cache')
 
 # Scrape actueel page contents
 def scrape_actueel():
@@ -92,9 +143,9 @@ def send_email(articles):
     htmlMessage['From'] = 'HWC Actueel <{}>'.format(sender)
     htmlMessage['To'] = recipient
     if len(articles) > 1:
-        htmlMessage['Subject'] = 'Nieuwe berichten op HWC website'
+        htmlMessage['Subject'] = 'Nieuwe berichten op HWC actueel'
     else:
-        htmlMessage['Subject'] = 'Nieuw bericht op HWC website'
+        htmlMessage['Subject'] = 'Nieuw bericht op HWC actueel'
 
     htmlMessage.attach(MIMEText(html, 'html'))
 
@@ -106,6 +157,7 @@ def send_email(articles):
 
 # Main function
 def main():
+    # Scrape actueel
     new_articles = []
     raw_articles = scrape_actueel()
     for article in raw_articles:
@@ -119,6 +171,16 @@ def main():
         send_email(new_articles)
     else:
         print('No new article was found.')
+
+    # Scrape home
+    home_title, home_content = scrape_home()
+    home_body = parse_home(home_title, home_content)
+    if check_home_cache(home_body):
+        print('No new home page content was found.')
+    else:
+        print('New home page content was found, rewriting cache...')
+        rewrite_home_cache(home_body)
+        email_home(home_body)
 
 if __name__ == "__main__":
     print("Starting scheduled HWC scraper...")
